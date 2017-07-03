@@ -1,0 +1,30 @@
+{
+  "blueprint" : "awesome",
+  "default_password" : "admin",
+  "host_groups" :[
+    {
+      "name" : "host_group_3", 
+      "hosts" : [         
+        {
+          "fqdn" : "server.vbox"
+        }
+      ]
+    },
+    {
+      "name" : "host_group_1", 
+      "hosts" : [         
+        {
+          "fqdn" : "node1.vbox"
+        }
+    ]
+    },
+    {
+      "name" : "host_group_2", 
+      "hosts" : [         
+        {
+          "fqdn" : "node2.vbox"
+        }
+    ]
+    }
+  ]
+}

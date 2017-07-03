@@ -1,0 +1,10 @@
+[server]
+10.0.3.15 ansible_ssh_private_key_file=/home/vagrant/stuff/ansible/server.key
+
+[node1]
+10.0.3.20 ansible_ssh_private_key_file=/home/vagrant/stuff/ansible/node1.key
+
+[node2]
+10.0.3.21 ansible_ssh_private_key_file=/home/vagrant/stuff/ansible/node2.key
+
+

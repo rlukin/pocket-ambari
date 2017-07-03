@@ -1,0 +1,150 @@
+- hosts: all
+  user: vagrant
+  become: true
+
+  tasks:
+  - name: insert/update hosts
+    blockinfile:
+      path: /etc/hosts
+      block: |
+         10.0.3.15 server.vbox server
+         10.0.3.20 node1.vbox  node1
+         10.0.3.21 node2.vbox  node2
+
+  - replace:
+      path: /etc/hosts
+      regexp: '^127\.0\.0\.1.*$'
+      replace: '127.0.0.1\s*localhost$'
+      backup: yes
+    
+  - name: Set authorized key took from file
+    authorized_key:
+      user: vagrant
+      state: present
+      key: "{{ lookup('file', '/home/vagrant/stuff/ansible/server.pub') }}"
+
+  - name: install ntpd
+    apt:
+        name: ntp
+        state: present
+
+  - name: check ntp
+    shell: 'service ntp restart'
+    register: shell_out
+
+  - debug:
+        msg: "{{ shell_out.stdout_lines }}"
+
+  - name: check ntp
+    shell: 'ntpq -p'
+    register: shell_out
+
+  - debug:
+        msg: "{{ shell_out.stdout_lines }}"
+
+  - name: disable iptables
+    shell: 'ufw disable'
+
+
+- hosts: server
+  user: vagrant
+  become: true
+
+  tasks:
+#server install
+
+  - name: download ambari.list
+    shell: 'wget -O /etc/apt/sources.list.d/ambari.list http://public-repo-1.hortonworks.com/ambari/ubuntu14/2.x/updates/2.5.1.0/ambari.list' 
+
+  - name: apt key get
+    shell: 'apt-key adv --recv-keys --keyserver keyserver.ubuntu.com B9733A7A07513CAD'
+
+  - name: apt key get
+    shell: 'apt-get update'
+
+  - name: install ambari-server
+    apt:
+        name: ambari-server
+        state: present
+
+  - name: Ensure ambari-server is stopped
+    service: name=ambari-server state=stopped
+
+  - name : Create folder
+    file : dest=/opt/ambari-install state=directory mode=0755
+  
+  - name: configure ambari-server
+    shell: creates=/opt/ambari-install/ansible.done ambari-server setup -s > /tmp/ambari-install-output executable=/bin/bash
+  
+  - name : check if ambari-server is installed
+    wait_for : path=/tmp/ambari-install-output search_regex="completed successfully"
+  
+  - name : start ambari server and enabled at reboot
+    service : name=ambari-server state=restarted enabled=yes
+  
+  - name : check if ambari-server is up
+    wait_for : host=127.0.0.1 port=8080 delay=10
+  
+- hosts: all
+  user: vagrant
+  become: true
+
+  tasks:
+
+  - name: download ambari.list
+    shell: 'wget -O /etc/apt/sources.list.d/ambari.list http://public-repo-1.hortonworks.com/ambari/ubuntu14/2.x/updates/2.5.1.0/ambari.list' 
+
+  - name: apt key get
+    shell: 'apt-key adv --recv-keys --keyserver keyserver.ubuntu.com B9733A7A07513CAD'
+
+  - name: apt key get
+    shell: 'apt-get update'
+
+  - name: install ambari-agent
+    apt:
+        name: ambari-agent
+        state: present
+
+  - name: insert/update hosts
+    blockinfile:
+      path: /etc/ambari-agent/conf/ambari-agent.ini
+      block: |
+        [server]
+        hostname=server.vbox
+
+  - name: start agent
+    shell: 'ambari-agent start'
+ 
+  roles:
+  - { role: ansible-transparent-huge-pages }
+    
+- hosts: node*
+  user: vagrant
+  become: true
+
+  tasks:
+
+  - name: Reboot
+    command: /sbin/shutdown -r now
+    async: 0
+    poll: 0
+    ignore_errors: true
+    
+- hosts: server
+  user: vagrant
+  become: true
+  tasks:
+    - shell: shutdown -r now
+      async: 0
+      poll: 0
+    - pause: seconds=30
+  
+    - local_action: wait_for host=10.0.3.15 state=started
+
+  
+    # And finally, execute 'blueprint provision' when the host is back.
+    - shell: 'curl -H "X-Requested-By: ambari" -X POST -u admin:admin http://server.vbox:8080/api/v1/blueprints/awesome -d @/home/vagrant/stuff/blueprint &&
+              curl -H "X-Requested-By: ambari" -X POST -u admin:admin http://server.vbox:8080/api/v1/clusters/awesome -d @/home/vagrant/stuff/map &&
+              curl -H "X-Requested-By: ambari" -X GET -u admin:admin http://server.vbox:8080/api/v1/clusters/awesome?format=blueprint'
+
+
