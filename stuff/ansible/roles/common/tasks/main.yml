@@ -1,0 +1,68 @@
+- name: Add nodes to /etc/hosts
+  blockinfile:
+    path: /etc/hosts
+    block: |
+       10.0.3.15 server.vbox server
+       10.0.3.20 node1.vbox  node1
+       10.0.3.21 node2.vbox  node2
+
+- name: Replace redundant localhost
+  replace:
+    path: /etc/hosts
+    regexp: '^127\.0\.0\.1.*$'
+    replace: '127.0.0.1\s*localhost$'
+    backup: yes
+
+
+- name: Enable passwordless auth
+  authorized_key:
+    user: vagrant
+    state: present
+    key: "{{ lookup('file', '/home/vagrant/stuff/ansible/server.pub') }}"
+
+- name: Install ntpd
+  apt:
+      name: ntp
+      state: present
+
+- name: Check ntp service
+  shell: 'service ntp restart'
+  register: shell_out
+
+- debug:
+      msg: "{{ shell_out.stdout_lines }}"
+
+- name: Show ntp offset
+  shell: 'ntpq -p'
+  register: shell_out
+
+- debug:
+      msg: "{{ shell_out.stdout_lines }}"
+
+
+- name: Disable iptables
+  shell: 'ufw disable'
+
+- name: Download ambari.list
+  shell: 'wget -O /etc/apt/sources.list.d/ambari.list http://public-repo-1.hortonworks.com/ambari/ubuntu14/2.x/updates/2.5.1.0/ambari.list' 
+
+- name: apt add key 
+  apt-key:
+      keyserver: keyserver.ubuntu.com
+      id: B9733A7A07513CAD
+      
+- name: install ambari-agent
+  apt:
+      name: ambari-agent
+      state: present
+      update_cache: yes
+
+- name: Change fqdn for ambari agent
+  blockinfile:
+    path: /etc/ambari-agent/conf/ambari-agent.ini
+    block: |
+      [server]
+      hostname=server.vbox
+
+- name: Start agent
+  shell: 'ambari-agent start'

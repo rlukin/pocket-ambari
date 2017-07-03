@@ -1,0 +1,4 @@
+- name: Reboot
+  command: /sbin/shutdown -r now
+  async: 0
+  poll: 0
