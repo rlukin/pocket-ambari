@@ -1,30 +1,42 @@
-- local_action: wait_for host=10.0.3.15 state=started
+- local_action: wait_for host=10.0.3.15 state=started  port=8080    
 
        
 - name: Send blueprint file
   uri:
     url: http://server.vbox:8080/api/v1/blueprints/awesome
-    method: POST
-    user: admin
-    password: admin
-    body: "{{ lookup('file','/home/vagrant/stuff/blueprint') }}"
     force_basic_auth: yes
-    body_format: json       
-    
+    method: POST
+    user: "admin"
+    password: "admin"
+    body: "{{ lookup('file','/home/vagrant/stuff/blueprint') | to_json }}"
+    headers:
+        X-Requested-By: "ambari"
+        Content-Type: "application/json"
+    body_format: json
+    status_code: 201
+
+
 - name: Send cluster template
   uri:
     url: http://server.vbox:8080/api/v1/clusters/awesome
-    method: POST
-    user: admin
-    password: admin
-    body: "{{ lookup('file','/home/vagrant/stuff/map') }}"
     force_basic_auth: yes
-    body_format: json     
-    
+    method: POST
+    user: "admin"
+    password: "admin"
+    body: "{{ lookup('file','/home/vagrant/stuff/map')  | to_json }}"
+    headers:
+        X-Requested-By: "ambari"
+        Content-Type: "application/json"
+    body_format: json
+    status_code: 202
+
+
 - name: Create cluster instance
   uri:
     url: http://server.vbox:8080/api/v1/clusters/awesome?format=blueprint
     method: GET
-    user: admin
-    password: admin
     force_basic_auth: yes
+    user: "admin"
+    password: "admin"
+    headers:
+        X-Requested-By: "ambari"
