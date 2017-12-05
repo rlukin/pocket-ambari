@@ -1,0 +1,62 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure(2) do |config|
+  config.vm.define "ambarisrv" do |config|
+    config.vm.box = "centos/7"
+    config.vm.box_check_update = false
+    config.vm.hostname = 'ambari-server.rlukin.ru'
+    config.vm.network "public_network"
+
+    config.vm.provider "virtualbox" do |vb|
+       vb.gui = false
+       vb.memory = "4098"
+       vb.cpus = "2"
+       vb.customize ["modifyvm", :id, "--cpuexecutioncap", "80"]
+       unless File.exist?('second_disk.vdi')
+           vb.customize ['createhd', '--filename', 'second_disk', '--size', 5 * 1024]
+       end
+       vb.customize ['storageattach', :id, '--storagectl', 'IDE Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', 'second_disk.vdi']
+    end
+
+    config.vm.provision "shell", path: "provision.sh"
+  end
+  config.vm.define "ambarinode1" do |config|
+    config.vm.box = "centos/7"
+    config.vm.box_check_update = false
+    config.vm.hostname = 'ambari-node1.rlukin.ru'
+    config.vm.network "public_network"
+
+    config.vm.provider "virtualbox" do |vb|
+       vb.gui = false
+       vb.memory = "8192"
+       vb.cpus = "2"
+       vb.customize ["modifyvm", :id, "--cpuexecutioncap", "80"]
+       unless File.exist?('second_disk.vdi')
+           vb.customize ['createhd', '--filename', 'second_disk', '--size', 5 * 1024]
+       end
+       vb.customize ['storageattach', :id, '--storagectl', 'IDE Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', 'second_disk.vdi']
+    end
+
+    config.vm.provision "shell", path: "provision.sh"
+  end
+  config.vm.define "ambarinode2" do |config|
+    config.vm.box = "centos/7"
+    config.vm.box_check_update = false
+    config.vm.hostname = 'ambari-node2.rlukin.ru'
+    config.vm.network "public_network"
+
+    config.vm.provider "virtualbox" do |vb|
+       vb.gui = false
+       vb.memory = "8192"
+       vb.cpus = "2"
+       vb.customize ["modifyvm", :id, "--cpuexecutioncap", "80"]
+       unless File.exist?('second_disk.vdi')
+           vb.customize ['createhd', '--filename', 'second_disk', '--size', 5 * 1024]
+       end
+       vb.customize ['storageattach', :id, '--storagectl', 'IDE Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', 'second_disk.vdi']
+    end
+
+    config.vm.provision "shell", path: "provision.sh"
+  end
+end

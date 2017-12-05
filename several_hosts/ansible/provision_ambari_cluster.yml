@@ -1,0 +1,23 @@
+- hosts: server
+  user: vagrant
+  become: yes
+  roles:
+    -  {role:  get_server_key,  tags:  'keys'}
+
+- hosts: all
+  user: vagrant
+  become: yes
+  roles:
+    -  {role:  distribute_keys,  tags:  'keys'}
+    -  {role:  ntp,              tags:  'essential'}
+    -  {role:  hosts,            tags:  'essential'}
+    -  {role:  security,         tags:  'essential'}
+    -  {role:  ambari-agent,     tags:  'essential'}
+
+
+- hosts: server
+  user: vagrant
+  become: yes
+  roles:
+    - {role: ambari-server,  tags: 'server'}
+    - {role: blueprint,      tags: 'provision'}

@@ -1,0 +1,6 @@
+[server]
+ambari-server.rlukin.ru
+
+[node]
+ambari-node1.rlukin.ru
+ambari-node2.rlukin.ru

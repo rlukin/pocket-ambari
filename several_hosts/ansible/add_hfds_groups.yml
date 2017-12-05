@@ -1,0 +1,65 @@
+- hosts: all
+  become: yes
+  user: vagrant
+  tasks:
+
+    - name: Add groups to nodes
+      group:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - "developers"
+        - "managers"
+  
+    - name: Add users to nodes
+      user:
+        name: "{{ item.name }}"
+        group: "{{ item.group }}"
+        createhome: no
+      with_items:
+        - name: "manager1"
+          group: "managers"
+        - name: "developer1"
+          group: "developers"
+        - name: "developer2"
+          group: "developers"
+
+- hosts: server
+  become_user: hdfs
+  become_method: sudo
+  become: yes
+  user: vagrant
+  tasks:
+
+    - name: Create dirs on hdfs
+      command: "hdfs dfs -mkdir -p /user/{{ item }}"
+      with_items:
+        - "manager1"
+        - "developer1"
+        - "developer2"
+        - "readonly"
+        - "writeonly"
+        - "squash"
+
+    - name: Change owners for hdfs folders
+      command: "hdfs dfs -chown -R {{ item.name }}:{{ item.group }} /user/{{ item.name }}"
+      with_items:
+        - name: "manager1"
+          group: "managers"
+        - name: "developer1"
+          group: "developers"
+        - name: "developer2"
+          group: "developers"
+
+    - name: set acl rules for hdfs
+      command: "hdfs dfs -setfacl -m user:{{ item }}"
+      with_items:
+        - "manager1:rwx  /user/writeonly"
+        - "manager1:rwx  /user/readonly"
+        - "manager1:rwx  /user/squash"
+        - "developer1:r--  /user/readonly"
+        - "developer2:r--  /user/readonly"
+        - "developer1:-w-  /user/writeonly"
+        - "developer2:-w-  /user/writeonly"
+        - "developer1:rw-  /user/squash"
+        - "developer2:rw-  /user/squash"

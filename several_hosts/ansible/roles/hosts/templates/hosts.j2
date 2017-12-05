@@ -1,0 +1,6 @@
+127.0.0.1 localhost
+
+{{ cluster.server.ip }} {{ cluster.server.url }}
+{% for node in cluster.nodes %}
+{{ node.ip }} {{ node.url }}
+{% endfor %}

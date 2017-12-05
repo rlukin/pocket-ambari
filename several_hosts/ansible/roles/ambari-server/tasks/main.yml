@@ -1,0 +1,34 @@
+---
+# tasks file for roles/ambari-server
+- name: Add ambari repo
+  get_url:
+    url: 'http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.0.0/ambari.repo'
+    dest: '/etc/yum.repos.d/ambari.repo'
+    mode: 0644
+
+- name: Install ambari
+  yum:
+    name: ambari-server
+    state: present
+
+- name: Ensure ambari-server is stopped
+  service:
+    name: ambari-server
+    state: stopped
+
+- name : Create folder
+  file :
+   dest: /opt/ambari-install
+   state: directory
+   mode: 0755
+
+- name: Setup ambari-server
+  shell: 'ambari-server setup -s'
+  creates: /opt/ambari-install/ansible.done
+  executable: /bin/bash
+
+- name: Start service
+  service:
+    name: ambari-server
+    state: started
+    enabled: yes

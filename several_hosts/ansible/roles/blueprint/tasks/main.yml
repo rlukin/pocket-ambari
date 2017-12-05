@@ -1,0 +1,50 @@
+---
+# tasks file for roles/blueprint
+- name: Waiting for ambari up
+  become: no 
+  local_action:
+        module: wait_for
+        host: "{{ cluster.server.ip }}"
+        state: started
+        port: 8080
+
+
+- name: Send blueprint file
+  uri:
+    url: "http://{{ cluster.server.url }}:8080/api/v1/blueprints/{{ cluster_name }}"
+    force_basic_auth: yes
+    method: POST
+    user: "admin"
+    password: "admin"
+    body: "{{ lookup('file', 'blueprint') | to_json }}"
+    headers:
+        X-Requested-By: "ambari"
+        Content-Type: "application/json"
+    body_format: json
+    status_code: 201
+
+
+- name: Send cluster template
+  uri:
+    url: "http://{{ cluster.server.url }}:8080/api/v1/clusters/{{ cluster_name }}"
+    force_basic_auth: yes
+    method: POST
+    user: "admin"
+    password: "admin"
+    body: "{{ lookup('template', 'map.j2')}}"
+    body_format: json
+    headers:
+        X-Requested-By: "ambari"
+        Content-Type: "text/plain"
+    status_code: 202
+
+
+- name: Create cluster instance
+  uri:
+    url: "http://{{ cluster.server.url }}:8080/api/v1/clusters/{{ cluster_name }}?format=blueprint"
+    method: GET
+    force_basic_auth: yes
+    user: "admin"
+    password: "admin"
+    headers:
+        X-Requested-By: "ambari"

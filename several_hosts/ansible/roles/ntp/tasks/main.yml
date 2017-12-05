@@ -1,0 +1,12 @@
+---
+# tasks file for roles/ntp
+- name: Install ntpd
+  yum:
+    name: ntp
+    state: present
+
+- name: Enable service ntpd
+  service:
+    name: ntpd
+    state: started
+    enabled: yes

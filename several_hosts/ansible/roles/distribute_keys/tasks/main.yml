@@ -1,0 +1,6 @@
+---
+# tasks file for roles/distribute_keys
+- name: Add server key to authorized_hosts
+  authorized_key:
+          user: root
+          key: "{{ lookup('file', '/tmp/server.pub') }}"

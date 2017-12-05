@@ -1,0 +1,6 @@
+---
+# tasks file for roles/hosts
+- name: Add fqdns to /etc/hosts
+  template:
+          src: hosts.j2
+          dest: "/etc/hosts"

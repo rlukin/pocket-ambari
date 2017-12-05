@@ -1,0 +1,12 @@
+---
+# tasks file for roles/get_server_key
+- name: Generate ssh-keys
+  user:
+    name: root
+    generate_ssh_key: yes
+
+- name: Fetch public key
+  fetch:
+    src: /root/.ssh/id_rsa.pub
+    dest: /tmp/server.pub
+    flat: yes

@@ -1,0 +1,11 @@
+cluster:
+  server:
+    url: "ambari-server.rlukin.ru"
+    ip: "10.66.40.238"
+  nodes:
+    - url: "ambari-node1.rlukin.ru"
+      ip: "10.66.40.217"
+    - url: "ambari-node2.rlukin.ru"
+      ip: "10.66.40.221"
+
+cluster_name: "squid"

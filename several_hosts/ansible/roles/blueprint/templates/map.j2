@@ -1,0 +1,30 @@
+{
+  "blueprint" : "{{ cluster_name }}",
+  "default_password" : "{{ admin_password }}",
+  "host_groups" :[
+    {
+      "name" : "host_group_3", 
+      "hosts" : [         
+        {
+          "fqdn" : "{{ cluster.server.url }}"
+        }
+      ]
+    },
+    {
+      "name" : "host_group_1", 
+      "hosts" : [         
+        {
+          "fqdn" : "{{ cluster.nodes[0].url }}"
+        }
+    ]
+    },
+    {
+      "name" : "host_group_2", 
+      "hosts" : [         
+        {
+          "fqdn" : "{{ cluster.nodes[1].url }}"
+        }
+    ]
+    }
+  ]
+}
