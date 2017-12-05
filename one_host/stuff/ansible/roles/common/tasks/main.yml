@@ -29,9 +29,6 @@
   shell: 'service ntp restart'
   register: shell_out
 
-- debug:
-      msg: "{{ shell_out.stdout_lines }}"
-
 - name: Show ntp offset
   shell: 'ntpq -p'
   register: shell_out
@@ -39,18 +36,17 @@
 - debug:
       msg: "{{ shell_out.stdout_lines }}"
 
-
 - name: Disable iptables
   shell: 'ufw disable'
 
 - name: Download ambari.list
   shell: 'wget -O /etc/apt/sources.list.d/ambari.list http://public-repo-1.hortonworks.com/ambari/ubuntu14/2.x/updates/2.5.1.0/ambari.list' 
 
-- name: apt add key 
+- name: apt add key
   apt_key:
       keyserver: keyserver.ubuntu.com
       id: B9733A7A07513CAD
-      
+
 - name: install ambari-agent
   apt:
       name: ambari-agent
