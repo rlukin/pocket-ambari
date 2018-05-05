@@ -1,5 +1,5 @@
 # Pocket ambari
-## Set up your own hadoop cluster based on ambaril using virtual machines for learning purposes on several hosts
+## Set up your own hadoop cluster based on ambari using virtual machines for learning purposes on several hosts
 
 ### Single node
 This part was made for setting up ambari on single machine using VM with ansible (main reason - I had to use Windows)
