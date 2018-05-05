@@ -10,6 +10,7 @@ Also blueprint and hostmapping is provisioned.
 * Just run `vagrant up` and wait until everything is up
 * Remove `provision_cluster` from `stuff/ansible/main.yml`, if you'd like to install different configuration
 * Connect to ambari UI at localhost:8080
+* Creds `admin:admin`
 
 
 ### Several nodes
